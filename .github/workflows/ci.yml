@@ -12,9 +12,8 @@ permissions:
 # Track the latest stable Go (org convention). go.mod floor is 1.26.4.
 # The library is pure Go (CGO=0) and in-process — no network is touched: the
 # span exporter is an injectable seam and tests use the in-memory exporter.
-env:
-  CGO_ENABLED: "0"
-
+# The race detector needs cgo, so the test lane leaves CGO at its default; the
+# arch lanes pin CGO_ENABLED=0 to prove the code is cgo-free.
 jobs:
   # Build, vet, race-test and enforce 100% coverage on the three host OSes.
   # Correctness is verified against the backing go.opentelemetry.io/otel SDK
@@ -61,6 +60,8 @@ jobs:
         with:
           go-version: stable
       - run: go env GOARCH && go test ./...
+        env:
+          CGO_ENABLED: "0"
 
   # The remaining four arches (incl. big-endian s390x) run under qemu-user.
   arch-qemu:
@@ -82,3 +83,5 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y qemu-user-static
       - name: Test under qemu (${{ matrix.goarch }})
         run: GOARCH=${{ matrix.goarch }} go test -timeout 20m -exec=${{ matrix.qemu }} ./...
+        env:
+          CGO_ENABLED: "0"
