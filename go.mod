@@ -1,6 +1,6 @@
 module github.com/go-ruby-opentelemetry/opentelemetry
 
-go 1.26.4
+go 1.27.1
 
 require (
 	go.opentelemetry.io/otel v1.47.0
